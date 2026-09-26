@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
+import 'status_badge.dart';
 
 class ClientCard extends StatelessWidget {
   final Client client;
@@ -12,7 +13,7 @@ class ClientCard extends StatelessWidget {
       child: ListTile(
         title: Text(client.name),
         subtitle: Text('${client.contactPerson} · ${client.phone}'),
-        trailing: Text(client.stage),
+        trailing: StatusBadge(stage: client.stage),
       ),
     );
   }

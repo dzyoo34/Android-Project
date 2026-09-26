@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import 'create_note_screen.dart';
+import '../widgets/status_badge.dart';
 
 class ClientDetailScreen extends StatelessWidget {
   final Client client;
@@ -21,7 +22,7 @@ class ClientDetailScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 4),
-            Text(client.stage),
+            StatusBadge(stage: client.stage),
             const SizedBox(height: 24),
             Card(
               child: Column(
