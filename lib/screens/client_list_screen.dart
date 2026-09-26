@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../widgets/client-card.dart';
+import 'client_detail_screen.dart';
 
 class ClientListScreen extends StatelessWidget {
   const ClientListScreen({super.key});
@@ -51,7 +52,16 @@ class ClientListScreen extends StatelessWidget {
               itemCount: mockClients.length,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                return ClientCard(client: mockClients[index]);
+                final client = mockClients[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ClientDetailScreen(client: client)),
+                    );
+                  },
+                  child: ClientCard(client: client),
+                );
               },
             ),
           ),
