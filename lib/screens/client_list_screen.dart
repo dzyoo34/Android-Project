@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
 import '../widgets/client-card.dart';
 import 'client_detail_screen.dart';
+import 'profile_screen.dart';
 
 class ClientListScreen extends StatelessWidget {
   const ClientListScreen({super.key});
@@ -9,7 +10,20 @@ class ClientListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Клиенты и сделки')),
+      appBar: AppBar(
+        title: const Text('Клиенты и сделки'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
