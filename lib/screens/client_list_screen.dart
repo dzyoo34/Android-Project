@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../data/mock_data.dart';
 import '../widgets/client-card.dart';
-import 'client_detail_screen.dart';
-import 'profile_screen.dart';
 
 class ClientListScreen extends StatelessWidget {
   const ClientListScreen({super.key});
@@ -10,20 +9,7 @@ class ClientListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Клиенты и сделки'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Клиенты и сделки')),
       body: Column(
         children: [
           Padding(
@@ -67,14 +53,9 @@ class ClientListScreen extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final client = mockClients[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => ClientDetailScreen(client: client)),
-                    );
-                  },
-                  child: ClientCard(client: client),
+                return ClientCard(
+                  client: client,
+                  onTap: () => context.push('/clients/${client.id}'),
                 );
               },
             ),
