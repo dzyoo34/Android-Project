@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../data/mock_data.dart';
-import 'create_note_screen.dart';
 import '../widgets/status_badge.dart';
 
 class ClientDetailScreen extends StatelessWidget {
@@ -69,12 +69,7 @@ class ClientDetailScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const CreateNoteScreen()),
-                  );
-                },
+                onPressed: () => context.push('/clients/${client.id}/note'),
                 icon: const Icon(Icons.note_add),
                 label: const Text('Добавить отчёт о визите'),
               ),
