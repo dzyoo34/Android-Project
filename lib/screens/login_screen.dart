@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mobile CRM')),
+      appBar: AppBar(title: const Text('Beta-Lite CRM')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Form(
