@@ -1,20 +1,4 @@
-class Client {
-  final int id;
-  final String name;
-  final String contactPerson;
-  final String phone;
-  final String stage;
-  final String lastVisit;
-
-  const Client({
-    required this.id,
-    required this.name,
-    required this.contactPerson,
-    required this.phone,
-    required this.stage,
-    required this.lastVisit,
-  });
-}
+import 'client.dart';
 
 const mockClients = [
   Client(

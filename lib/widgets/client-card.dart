@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../data/mock_data.dart';
+import '../data/client.dart';
 import 'status_badge.dart';
+
 
 class ClientCard extends StatelessWidget {
   final Client client;
