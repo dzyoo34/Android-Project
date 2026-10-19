@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'data/mock_client_repository.dart';
+import 'models/clients_model.dart';
+import 'models/notes_model.dart';
 import 'router.dart';
 
 void main() {
-  runApp(const MyApp());
+  // здесь выбирается источник данных
+  final repository = MockClientRepository();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        // нужен только для переключателя аварии в профиле
+        Provider<MockClientRepository>.value(value: repository),
+        ChangeNotifierProvider(
+          create: (_) => ClientsModel(repository)..load(),
+        ),
+        ChangeNotifierProvider(create: (_) => NotesModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
