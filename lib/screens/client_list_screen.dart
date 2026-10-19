@@ -1,15 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../data/mock_data.dart';
+import 'package:provider/provider.dart';
+import '../models/clients_model.dart';
+import '../models/notes_model.dart';
 import '../widgets/client-card.dart';
+import '../widgets/error_view.dart';
 
 class ClientListScreen extends StatelessWidget {
   const ClientListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // watch в build: экран следит за моделью
+    final model = context.watch<ClientsModel>();
+
+    final Widget list;
+    if (model.isLoading) {
+      list = const Center(child: CircularProgressIndicator());
+    } else if (model.error != null) {
+      list = ErrorView(
+        message: model.error!,
+        // read в callback: просто действие
+        onRetry: () => context.read<ClientsModel>().load(),
+      );
+    } else {
+      list = ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: model.clients.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          final client = model.clients[index];
+          return ClientCard(
+            client: client,
+            onTap: () => context.push('/clients/${client.id}'),
+          );
+        },
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Клиенты и сделки')),
+      appBar: AppBar(
+        title: const Text('Клиенты и сделки'),
+        actions: [
+          // Consumer: badge с количеством отчётов
+          Consumer<NotesModel>(
+            builder: (context, notes, child) =>
+                Badge(label: Text('${notes.count}'), child: child!),
+            child: const Icon(Icons.description_outlined),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
@@ -46,20 +87,7 @@ class ClientListScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: mockClients.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final client = mockClients[index];
-                return ClientCard(
-                  client: client,
-                  onTap: () => context.push('/clients/${client.id}'),
-                );
-              },
-            ),
-          ),
+          Expanded(child: list),
         ],
       ),
     );
