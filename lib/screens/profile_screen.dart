@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../data/mock_client_repository.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
-  Future<void> _logout(BuildContext context) async {
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _simulateError = false; // эфемерное состояние - обычный setState
+
+  Future<void> _logout() async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
@@ -22,7 +31,7 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
 
-    if (ok == true && context.mounted) {
+    if (ok == true && mounted) {
       context.go('/login');
     }
   }
@@ -35,9 +44,9 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               radius: 40,
-              child: const Text('ИА', style: TextStyle(fontSize: 24)),
+              child: Text('ИА', style: TextStyle(fontSize: 24)),
             ),
             const SizedBox(height: 16),
             Text(
@@ -48,11 +57,22 @@ class ProfileScreen extends StatelessWidget {
             const Text('Агент по продажам'),
             const SizedBox(height: 16),
             const Text('Статус: В сети'),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('Симулировать сбой сети'),
+              value: _simulateError,
+              onChanged: (value) {
+                setState(() {
+                  _simulateError = value;
+                });
+                context.read<MockClientRepository>().simulateError = value;
+              },
+            ),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () => _logout(context),
+                onPressed: _logout,
                 icon: const Icon(Icons.logout),
                 label: const Text('Выйти'),
               ),
