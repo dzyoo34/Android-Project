@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'data/mock_data.dart';
 import 'screens/login_screen.dart';
 import 'screens/client_list_screen.dart';
 import 'screens/client_detail_screen.dart';
@@ -30,13 +29,15 @@ final router = GoRouter(
                   path: ':id',
                   builder: (context, state) {
                     final id = int.parse(state.pathParameters['id']!);
-                    final client = mockClients.firstWhere((c) => c.id == id);
-                    return ClientDetailScreen(client: client);
+                    return ClientDetailScreen(id: id);
                   },
                   routes: [
                     GoRoute(
                       path: 'note',
-                      builder: (context, state) => const CreateNoteScreen(),
+                      builder: (context, state) {
+                        final id = int.parse(state.pathParameters['id']!);
+                        return CreateNoteScreen(clientId: id);
+                      },
                     ),
                   ],
                 ),
