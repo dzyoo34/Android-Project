@@ -46,7 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const CircleAvatar(
               radius: 40,
-              child: Text('ИА', style: TextStyle(fontSize: 24)),
+              child: Text('НС', style: TextStyle(fontSize: 24)),
             ),
             const SizedBox(height: 16),
             Text(
