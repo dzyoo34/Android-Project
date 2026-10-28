@@ -28,6 +28,17 @@ void initDb(String path) {
       created_at TEXT    NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS clients (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id        INTEGER NOT NULL REFERENCES users (id),
+      name           TEXT    NOT NULL,
+      contact_person TEXT    NOT NULL DEFAULT '',
+      phone          TEXT    NOT NULL DEFAULT '',
+      stage          TEXT    NOT NULL DEFAULT 'Новый лид',
+      last_visit     TEXT    NOT NULL DEFAULT '',
+      created_at     TEXT    NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS files (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id    INTEGER NOT NULL REFERENCES users (id),
@@ -40,5 +51,4 @@ void initDb(String path) {
   ''');
 }
 
-/// Current UTC time in ISO-8601, the format used for all timestamps.
 String nowIso() => DateTime.now().toUtc().toIso8601String();

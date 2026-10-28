@@ -10,6 +10,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 
 import 'package:server/auth.dart';
+import 'package:server/clients.dart';
 import 'package:server/db.dart';
 import 'package:server/errors.dart';
 import 'package:server/files.dart';
@@ -22,19 +23,25 @@ Future<void> main() async {
   initFileStorage('uploads'); // creates uploads/ on first start
 
   final router =
-      Router(notFoundHandler: (Request r) => notFound('Route not found'))
-        ..get('/health', (Request r) => jsonResponse({'status': 'ok'}))
-        ..post('/auth/register', register)
-        ..post('/auth/login', login)
-        ..get('/me', requireAuth(me))
-        // Notes: the example entity. Register your own routes the same way.
-        ..get('/notes', requireAuth(listNotes))
-        ..post('/notes', requireAuth(createNote))
-        ..get('/notes/<id>', requireAuth(getNote))
-        ..put('/notes/<id>', requireAuth(updateNote))
-        ..delete('/notes/<id>', requireAuth(deleteNote))
-        ..post('/files', requireAuth(uploadFile))
-        ..get('/files/<id>', downloadFile);
+  Router(notFoundHandler: (Request r) => notFound('Route not found'))
+    ..get('/health', (Request r) => jsonResponse({'status': 'ok'}))
+    ..post('/auth/register', register)
+    ..post('/auth/login', login)
+    ..get('/me', requireAuth(me))
+  // Notes: the example entity. Register your own routes the same way.
+    ..get('/notes', requireAuth(listNotes))
+    ..post('/notes', requireAuth(createNote))
+    ..get('/notes/<id>', requireAuth(getNote))
+    ..put('/notes/<id>', requireAuth(updateNote))
+    ..delete('/notes/<id>', requireAuth(deleteNote))
+  // Clients: наша сущность (CRM)
+    ..get('/clients', requireAuth(listClients))
+    ..post('/clients', requireAuth(createClient))
+    ..get('/clients/<id>', requireAuth(getClient))
+    ..put('/clients/<id>', requireAuth(updateClient))
+    ..delete('/clients/<id>', requireAuth(deleteClient))
+    ..post('/files', requireAuth(uploadFile))
+    ..get('/files/<id>', downloadFile);
 
   final handler = const Pipeline()
       .addMiddleware(logRequests())
@@ -53,9 +60,9 @@ const _corsHeaders = {
 };
 
 Handler _cors(Handler inner) => (Request request) async {
-      if (request.method == 'OPTIONS') {
-        return Response.ok('', headers: _corsHeaders);
-      }
-      final response = await inner(request);
-      return response.change(headers: _corsHeaders);
-    };
+  if (request.method == 'OPTIONS') {
+    return Response.ok('', headers: _corsHeaders);
+  }
+  final response = await inner(request);
+  return response.change(headers: _corsHeaders);
+};
