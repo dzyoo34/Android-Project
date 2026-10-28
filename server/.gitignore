@@ -1,0 +1,7 @@
+# Dart tooling
+.dart_tool/
+
+# Runtime data (created automatically on first start)
+app.db
+app.db-*
+uploads/
