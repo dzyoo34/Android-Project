@@ -5,12 +5,14 @@ class VisitNote {
   final String text;
   final String stage;
   final String date;
+  final String? imageUrl;
 
   const VisitNote({
     required this.clientId,
     required this.text,
     required this.stage,
     required this.date,
+    this.imageUrl,
   });
 }
 
