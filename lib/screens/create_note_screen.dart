@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import '../config.dart';
+import '../data/file_api.dart';
+import '../data/result.dart';
 import '../models/clients_model.dart';
 import '../models/notes_model.dart';
 
@@ -17,11 +21,33 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   final _formKey = GlobalKey<FormState>();
   final _noteCtrl = TextEditingController();
   String? _stage;
+  String? _photoUrl;
+  bool _uploading = false;
 
   @override
   void dispose() {
     _noteCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickPhoto() async {
+    final api = context.read<FileApi>();
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    setState(() => _uploading = true);
+    final result = await api.upload(picked.path);
+    if (!mounted) return;
+    setState(() => _uploading = false);
+
+    switch (result) {
+      case Ok(:final value):
+        setState(() => _photoUrl = value);
+      case Err(:final msg):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+    }
   }
 
   Future<void> _save() async {
@@ -36,7 +62,6 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     final today =
         '${now.day.toString().padLeft(2, '0')}.${now.month.toString().padLeft(2, '0')}.${now.year}';
 
-    // обновляем этап и дату визита клиента через repository
     final error = await clients.update(
       client.copyWith(stage: _stage, lastVisit: today),
     );
@@ -54,6 +79,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
       text: _noteCtrl.text.trim(),
       stage: _stage!,
       date: today,
+      imageUrl: _photoUrl,
     ));
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -95,8 +121,11 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                 ),
                 items: const [
                   DropdownMenuItem(value: 'Новый лид', child: Text('Новый лид')),
-                  DropdownMenuItem(value: 'Встреча назначена', child: Text('Встреча назначена')),
-                  DropdownMenuItem(value: 'Переговоры', child: Text('Переговоры')),
+                  DropdownMenuItem(
+                      value: 'Встреча назначена',
+                      child: Text('Встреча назначена')),
+                  DropdownMenuItem(
+                      value: 'Переговоры', child: Text('Переговоры')),
                   DropdownMenuItem(value: 'Закрыт', child: Text('Закрыт')),
                 ],
                 onChanged: (value) {
@@ -121,10 +150,17 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: _uploading ? null : _pickPhoto,
                 icon: const Icon(Icons.camera_alt),
-                label: const Text('Прикрепить фото'),
+                label: Text(_photoUrl == null
+                    ? 'Прикрепить фото'
+                    : 'Заменить фото'),
               ),
+              if (_photoUrl != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Image.network('$apiBase$_photoUrl', height: 120),
+                ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

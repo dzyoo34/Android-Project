@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../config.dart';
 import '../data/client.dart';
 import '../models/clients_model.dart';
 import '../models/notes_model.dart';
@@ -139,6 +140,10 @@ class ClientDetailScreen extends StatelessWidget {
           for (final note in notes)
             Card(
               child: ListTile(
+                leading: note.imageUrl == null
+                    ? null
+                    : Image.network('$apiBase${note.imageUrl}',
+                    width: 48, height: 48, fit: BoxFit.cover),
                 title: Text(note.text),
                 subtitle: Text('${note.date} · ${note.stage}'),
               ),

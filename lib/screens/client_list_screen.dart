@@ -20,15 +20,25 @@ class ClientListScreen extends StatelessWidget {
     } else if (model.error != null) {
       list = ErrorView(
         message: model.error!,
-        // read в callback: просто действие
         onRetry: () => context.read<ClientsModel>().load(),
       );
+    } else if (model.clients.isEmpty) {
+      list = const Center(child: Text('Ничего не найдено'));
     } else {
+      final count = model.clients.length + (model.hasMore ? 1 : 0);
       list = ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: model.clients.length,
+        itemCount: count,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
+          // последний элемент-хвост: просим следующую страницу
+          if (index == model.clients.length) {
+            context.read<ClientsModel>().loadMore();
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
           final client = model.clients[index];
           return ClientCard(
             client: client,
@@ -42,6 +52,10 @@ class ClientListScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Клиенты и сделки'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => context.read<ClientsModel>().load(),
+          ),
           // Consumer: badge с количеством отчётов
           Consumer<NotesModel>(
             builder: (context, notes, child) =>
@@ -51,11 +65,18 @@ class ClientListScreen extends StatelessWidget {
           const SizedBox(width: 16),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/clients/new'),
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
+              textInputAction: TextInputAction.search,
+              onSubmitted: (q) =>
+                  context.read<ClientsModel>().load(search: q.trim()),
               decoration: InputDecoration(
                 hintText: 'Поиск по компании...',
                 prefixIcon: const Icon(Icons.search),
