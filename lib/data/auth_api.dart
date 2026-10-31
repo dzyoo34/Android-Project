@@ -37,6 +37,7 @@ class AuthApi {
       }
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       await tokens.save(data['token'] as String);
+      await tokens.saveEmail(body['email'] as String);
       return const Ok(null);
     } on SocketException {
       return const Err('Нет сети — повторите попытку');

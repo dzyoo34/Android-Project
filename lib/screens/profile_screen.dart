@@ -25,7 +25,7 @@ class ProfileScreen extends StatelessWidget {
     );
 
     if (ok != true || !context.mounted) return;
-    await context.read<AuthApi>().logout(); // token стёрт
+    await context.read<AuthApi>().logout();
     if (!context.mounted) return;
     context.go('/login');
   }
@@ -36,31 +36,41 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Профиль')),
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const CircleAvatar(
-              radius: 40,
-              child: Text('НС', style: TextStyle(fontSize: 24)),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Никитос',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 4),
-            const Text('Агент по продажам'),
-            const SizedBox(height: 16),
-            const Text('Статус: В сети'),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _logout(context),
-                icon: const Icon(Icons.logout),
-                label: const Text('Выйти'),
-              ),
-            ),
-          ],
+        child: FutureBuilder<String?>(
+          // email вошедшего, сохранённый при входе
+          future: context.read<AuthApi>().tokens.readEmail(),
+          builder: (context, snapshot) {
+            final email = snapshot.data ?? 'Пользователь';
+            return Column(
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  child: Text(
+                    email.substring(0, 1).toUpperCase(),
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  email,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 4),
+                const Text('Агент по продажам'),
+                const SizedBox(height: 16),
+                const Text('Статус: В сети'),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _logout(context),
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Выйти'),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
