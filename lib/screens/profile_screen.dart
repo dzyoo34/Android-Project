@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../data/mock_client_repository.dart';
+import '../data/auth_api.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  bool _simulateError = false; // эфемерное состояние - обычный setState
-
-  Future<void> _logout() async {
+  Future<void> _logout(BuildContext context) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
@@ -31,9 +24,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
 
-    if (ok == true && mounted) {
-      context.go('/login');
-    }
+    if (ok != true || !context.mounted) return;
+    await context.read<AuthApi>().logout(); // token стёрт
+    if (!context.mounted) return;
+    context.go('/login');
   }
 
   @override
@@ -57,22 +51,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const Text('Агент по продажам'),
             const SizedBox(height: 16),
             const Text('Статус: В сети'),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              title: const Text('Симулировать сбой сети'),
-              value: _simulateError,
-              onChanged: (value) {
-                setState(() {
-                  _simulateError = value;
-                });
-                context.read<MockClientRepository>().simulateError = value;
-              },
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: _logout,
+                onPressed: () => _logout(context),
                 icon: const Icon(Icons.logout),
                 label: const Text('Выйти'),
               ),

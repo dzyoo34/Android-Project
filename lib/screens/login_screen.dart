@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../data/auth_api.dart';
+import '../data/result.dart';
+import '../models/clients_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,17 +16,39 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  bool _isRegister = false;
+  bool _busy = false; // гасит кнопку на время запроса
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _nameCtrl.dispose();
     super.dispose();
   }
 
-  void _login() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    context.go('/clients');
+
+    setState(() => _busy = true);
+    final auth = context.read<AuthApi>();
+    final result = _isRegister
+        ? await auth.register(_emailCtrl.text.trim(), _passwordCtrl.text,
+        _nameCtrl.text.trim())
+        : await auth.login(_emailCtrl.text.trim(), _passwordCtrl.text);
+    if (!mounted) return;
+    setState(() => _busy = false);
+
+    switch (result) {
+      case Ok():
+        context.read<ClientsModel>().load();
+        context.go('/clients');
+      case Err(:final msg):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+    }
   }
 
   @override
@@ -36,6 +62,23 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              if (_isRegister) ...[
+                TextFormField(
+                  controller: _nameCtrl,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'Имя',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Введите имя';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
               TextFormField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
@@ -74,9 +117,17 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: _login,
-                  child: const Text('Войти'),
+                  onPressed: _busy ? null : _submit,
+                  child: Text(_isRegister ? 'Зарегистрироваться' : 'Войти'),
                 ),
+              ),
+              TextButton(
+                onPressed: _busy
+                    ? null
+                    : () => setState(() => _isRegister = !_isRegister),
+                child: Text(_isRegister
+                    ? 'Уже есть аккаунт? Войти'
+                    : 'Нет аккаунта? Зарегистрируйтесь'),
               ),
             ],
           ),

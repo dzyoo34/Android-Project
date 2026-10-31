@@ -1,21 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'data/mock_client_repository.dart';
+import 'config.dart';
+import 'data/auth_api.dart';
+import 'data/file_api.dart';
+import 'data/http_client_repository.dart';
+import 'data/token_store.dart';
 import 'models/clients_model.dart';
 import 'models/notes_model.dart';
 import 'router.dart';
 
-void main() {
-  // здесь выбирается источник данных
-  final repository = MockClientRepository();
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // prefs до runApp
+  final tokens = TokenStore();
+  final loggedIn = await tokens.read() != null; // запуск решает token
+
+  initRouter(loggedIn: loggedIn);
+
+  final repository = HttpClientRepository(
+    apiBase,
+    tokens,
+    onUnauthorized: () => router.go('/login'), // 401 -> login, в одном месте
+  );
 
   runApp(
     MultiProvider(
       providers: [
-        // нужен только для переключателя аварии в профиле
-        Provider<MockClientRepository>.value(value: repository),
+        Provider<AuthApi>(create: (_) => AuthApi(apiBase, tokens)),
+        Provider<FileApi>(create: (_) => FileApi(apiBase, tokens)),
         ChangeNotifierProvider(
-          create: (_) => ClientsModel(repository)..load(),
+          create: (_) {
+            final model = ClientsModel(repository);
+            if (loggedIn) model.load(); // без token грузить нечего
+            return model;
+          },
         ),
         ChangeNotifierProvider(create: (_) => NotesModel()),
       ],
@@ -30,7 +47,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Beta CRM',
+      title: 'Mobile CRM',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF3F51B5),
