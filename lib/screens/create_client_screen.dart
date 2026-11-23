@@ -69,7 +69,7 @@ class _CreateClientScreenState extends State<CreateClientScreen> {
                 controller: _nameCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Название компании',
-                  border: OutlineInputBorder(),
+
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -83,7 +83,7 @@ class _CreateClientScreenState extends State<CreateClientScreen> {
                 controller: _contactCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Контактное лицо',
-                  border: OutlineInputBorder(),
+
                 ),
               ),
               const SizedBox(height: 16),
@@ -92,7 +92,7 @@ class _CreateClientScreenState extends State<CreateClientScreen> {
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   labelText: 'Телефон',
-                  border: OutlineInputBorder(),
+
                 ),
               ),
               const SizedBox(height: 16),
@@ -100,7 +100,7 @@ class _CreateClientScreenState extends State<CreateClientScreen> {
                 value: _stage,
                 decoration: const InputDecoration(
                   labelText: 'Этап сделки',
-                  border: OutlineInputBorder(),
+
                 ),
                 items: const [
                   DropdownMenuItem(value: 'Новый лид', child: Text('Новый лид')),

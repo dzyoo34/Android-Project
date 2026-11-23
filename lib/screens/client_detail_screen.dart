@@ -5,7 +5,7 @@ import '../config.dart';
 import '../data/client.dart';
 import '../models/clients_model.dart';
 import '../models/notes_model.dart';
-import '../widgets/status_badge.dart';
+import '../theme.dart';
 
 class ClientDetailScreen extends StatelessWidget {
   final int id;
@@ -42,7 +42,7 @@ class ClientDetailScreen extends StatelessWidget {
       );
       return;
     }
-    context.pop(); // клиента больше нет, экран уходит
+    context.pop();
   }
 
   @override
@@ -50,6 +50,7 @@ class ClientDetailScreen extends StatelessWidget {
     final model = context.watch<ClientsModel>();
     final notes = context.watch<NotesModel>().forClient(id);
     final client = model.byId(id);
+    final scheme = Theme.of(context).colorScheme;
 
     if (client == null) {
       return Scaffold(
@@ -62,36 +63,95 @@ class ClientDetailScreen extends StatelessWidget {
       );
     }
 
+    final initial =
+    client.name.isEmpty ? '?' : client.name.substring(0, 1).toUpperCase();
+
     return Scaffold(
-      appBar: AppBar(title: Text(client.name)),
+      appBar: AppBar(title: const Text('Клиент')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          Text(
-            client.name,
-            style: Theme.of(context).textTheme.titleLarge,
+          // фиолетовая шапка с названием
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: appGradient,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    initial,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        client.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          client.stage,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: StatusBadge(stage: client.stage),
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Card(
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.person),
+                  leading: Icon(Icons.person_outline, color: scheme.primary),
                   title: const Text('Контактное лицо'),
                   subtitle: Text(client.contactPerson),
                 ),
+                const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.phone),
+                  leading: Icon(Icons.phone_outlined, color: scheme.primary),
                   title: const Text('Телефон'),
                   subtitle: Text(client.phone),
                 ),
+                const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.calendar_today),
+                  leading:
+                  Icon(Icons.calendar_today_outlined, color: scheme.primary),
                   title: const Text('Последний визит'),
                   subtitle: Text(client.lastVisit),
                 ),
@@ -118,34 +178,52 @@ class ClientDetailScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () => context.push('/clients/${client.id}/note'),
             icon: const Icon(Icons.note_add),
             label: const Text('Добавить отчёт о визите'),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: () => _delete(context, client),
-            icon: const Icon(Icons.delete),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: scheme.error,
+              side: BorderSide(color: scheme.error.withValues(alpha: 0.4)),
+            ),
+            icon: const Icon(Icons.delete_outline),
             label: const Text('Удалить клиента'),
           ),
           const SizedBox(height: 24),
           Text(
             'История визитов',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           if (notes.isEmpty) const Text('Пока нет отчётов'),
           for (final note in notes)
-            Card(
-              child: ListTile(
-                leading: note.imageUrl == null
-                    ? null
-                    : Image.network('$apiBase${note.imageUrl}',
-                    width: 48, height: 48, fit: BoxFit.cover),
-                title: Text(note.text),
-                subtitle: Text('${note.date} · ${note.stage}'),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Card(
+                child: ListTile(
+                  leading: note.imageUrl == null
+                      ? Icon(Icons.description_outlined,
+                      color: scheme.primary)
+                      : ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      '$apiBase${note.imageUrl}',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  title: Text(note.text),
+                  subtitle: Text('${note.date} · ${note.stage}'),
+                ),
               ),
             ),
         ],

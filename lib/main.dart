@@ -8,6 +8,7 @@ import 'data/token_store.dart';
 import 'models/clients_model.dart';
 import 'models/notes_model.dart';
 import 'router.dart';
+import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // prefs до runApp
@@ -48,11 +49,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Mobile CRM',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF3F51B5),
-        ),
-      ),
+      theme: buildTheme(), // вся тема теперь в theme.dart
       routerConfig: router,
     );
   }

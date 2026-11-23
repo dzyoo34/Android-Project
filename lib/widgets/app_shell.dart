@@ -12,10 +12,23 @@ class AppShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: navigationShell.goBranch,
+        onDestinationSelected: (index) {
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
+        },
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.business), label: 'Клиенты'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Профиль'),
+          NavigationDestination(
+            icon: Icon(Icons.business_outlined),
+            selectedIcon: Icon(Icons.business),
+            label: 'Клиенты',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Профиль',
+          ),
         ],
       ),
     );

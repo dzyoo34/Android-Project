@@ -11,8 +11,8 @@ class ClientListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // watch в build: экран следит за моделью
     final model = context.watch<ClientsModel>();
+    final scheme = Theme.of(context).colorScheme;
 
     final Widget list;
     if (model.isLoading) {
@@ -23,15 +23,24 @@ class ClientListScreen extends StatelessWidget {
         onRetry: () => context.read<ClientsModel>().load(),
       );
     } else if (model.clients.isEmpty) {
-      list = const Center(child: Text('Ничего не найдено'));
+      list = Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.search_off,
+                size: 56, color: scheme.primary.withValues(alpha: 0.5)),
+            const SizedBox(height: 12),
+            const Text('Ничего не найдено', style: TextStyle(fontSize: 16)),
+          ],
+        ),
+      );
     } else {
       final count = model.clients.length + (model.hasMore ? 1 : 0);
       list = ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
         itemCount: count,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        separatorBuilder: (context, index) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
-          // последний элемент-хвост: просим следующую страницу
           if (index == model.clients.length) {
             context.read<ClientsModel>().loadMore();
             return const Padding(
@@ -50,13 +59,12 @@ class ClientListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Клиенты и сделки'),
+        title: const Text('Клиенты'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => context.read<ClientsModel>().load(),
           ),
-          // Consumer: badge с количеством отчётов
           Consumer<NotesModel>(
             builder: (context, notes, child) =>
                 Badge(label: Text('${notes.count}'), child: child!),
@@ -65,24 +73,22 @@ class ClientListScreen extends StatelessWidget {
           const SizedBox(width: 16),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/clients/new'),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Клиент'),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
             child: TextField(
               textInputAction: TextInputAction.search,
               onSubmitted: (q) =>
                   context.read<ClientsModel>().load(search: q.trim()),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Поиск по компании...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                prefixIcon: Icon(Icons.search),
               ),
             ),
           ),
@@ -90,7 +96,7 @@ class ClientListScreen extends StatelessWidget {
             height: 40,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               children: const [
                 Padding(
                   padding: EdgeInsets.only(right: 8),

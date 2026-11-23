@@ -103,7 +103,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                 maxLines: 4,
                 decoration: const InputDecoration(
                   labelText: 'Итоги встречи',
-                  border: OutlineInputBorder(),
+
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -117,7 +117,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                 value: _stage,
                 decoration: const InputDecoration(
                   labelText: 'Новый этап сделки',
-                  border: OutlineInputBorder(),
+
                 ),
                 items: const [
                   DropdownMenuItem(value: 'Новый лид', child: Text('Новый лид')),
